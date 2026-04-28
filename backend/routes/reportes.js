@@ -1,10 +1,24 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  res.json({
-    mensaje: 'Ruta de reportes funcionando'
-  });
-});
+// Funciones del controlador de reportes
+const {
+  obtenerProductosInventario,
+  obtenerVentasGenerales,
+  obtenerDetalleVentas,
+  obtenerVentasPorCategoria,
+  obtenerProductosMasVendidos,
+  obtenerStockBajo,
+  obtenerVentasDiarias
+} = require('../controllers/reportesController');
+
+// Rutas de reportes
+router.get('/productos-inventario', obtenerProductosInventario);
+router.get('/ventas-generales', obtenerVentasGenerales);
+router.get('/detalle-ventas', obtenerDetalleVentas);
+router.get('/ventas-categoria', obtenerVentasPorCategoria);
+router.get('/productos-mas-vendidos', obtenerProductosMasVendidos);
+router.get('/stock-bajo', obtenerStockBajo);
+router.get('/ventas-diarias', obtenerVentasDiarias);
 
 module.exports = router;
