@@ -1,6 +1,212 @@
--- ------------------------------------------------------------
+-- Para  ejecutar el script varias veces
+DROP VIEW IF EXISTS v_stock_bajo;
+DROP VIEW IF EXISTS v_ventas_diarias;
+
+DROP TABLE IF EXISTS detalle_venta;
+DROP TABLE IF EXISTS venta;
+DROP TABLE IF EXISTS usuario;
+DROP TABLE IF EXISTS empleado;
+DROP TABLE IF EXISTS cliente;
+DROP TABLE IF EXISTS producto;
+DROP TABLE IF EXISTS proveedor;
+DROP TABLE IF EXISTS marca;
+DROP TABLE IF EXISTS categoria;
+
+
+-- 1. CATEGORIA
+-- Agrupa los productos de maquillaje
+CREATE TABLE categoria (
+    id_categoria SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    descripcion TEXT
+);
+
+-- 2. MARCA
+CREATE TABLE marca (
+    id_marca SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    pais_origen VARCHAR(100) NOT NULL,
+    descripcion TEXT
+);
+
+-- 3. PROVEEDOR
+CREATE TABLE proveedor (
+    id_proveedor SERIAL PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    telefono VARCHAR(20) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    direccion TEXT NOT NULL,
+    nit VARCHAR(20) NOT NULL UNIQUE
+);
+
+-- 4. PRODUCTO
+
+CREATE TABLE producto (
+    id_producto SERIAL PRIMARY KEY,
+    id_categoria INT NOT NULL,
+    id_marca INT NOT NULL,
+    id_proveedor INT NOT NULL,
+    nombre VARCHAR(200) NOT NULL,
+    descripcion TEXT,
+    precio_compra NUMERIC(10,2) NOT NULL CHECK (precio_compra >= 0),
+    precio_venta NUMERIC(10,2) NOT NULL CHECK (precio_venta >= 0),
+    stock INT NOT NULL DEFAULT 0 CHECK (stock >= 0),
+    stock_minimo INT NOT NULL DEFAULT 5 CHECK (stock_minimo >= 0),
+    sku VARCHAR(50) NOT NULL UNIQUE,
+    imagen VARCHAR(255),
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT fk_prod_categoria 
+        FOREIGN KEY (id_categoria) 
+        REFERENCES categoria(id_categoria),
+
+    CONSTRAINT fk_prod_marca 
+        FOREIGN KEY (id_marca) 
+        REFERENCES marca(id_marca),
+
+    CONSTRAINT fk_prod_proveedor 
+        FOREIGN KEY (id_proveedor) 
+        REFERENCES proveedor(id_proveedor)
+);
+
+-- 5. CLIENTE
+
+CREATE TABLE cliente (
+    id_cliente SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    telefono VARCHAR(20),
+    direccion TEXT,
+    fecha_registro DATE NOT NULL DEFAULT CURRENT_DATE
+);
+
+-- 6. EMPLEADO
+
+CREATE TABLE empleado (
+    id_empleado SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    telefono VARCHAR(20),
+    puesto VARCHAR(100) NOT NULL,
+    fecha_contratacion DATE NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+-- 7. USUARIO
+
+CREATE TABLE usuario (
+    id_usuario SERIAL PRIMARY KEY,
+    id_empleado INT NOT NULL UNIQUE,
+    username VARCHAR(60) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    rol VARCHAR(30) NOT NULL DEFAULT 'vendedor'
+        CHECK (rol IN ('admin', 'vendedor', 'supervisor')),
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    ultimo_login TIMESTAMPTZ,
+
+    CONSTRAINT fk_usr_empleado 
+        FOREIGN KEY (id_empleado) 
+        REFERENCES empleado(id_empleado)
+);
+
+-- 8. VENTA
+
+CREATE TABLE venta (
+    id_venta SERIAL PRIMARY KEY,
+    id_cliente INT NOT NULL,
+    id_empleado INT NOT NULL,
+    fecha_venta TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    subtotal NUMERIC(10,2) NOT NULL DEFAULT 0 CHECK (subtotal >= 0),
+    descuento NUMERIC(10,2) NOT NULL DEFAULT 0 CHECK (descuento >= 0),
+    total NUMERIC(10,2) NOT NULL DEFAULT 0 CHECK (total >= 0),
+    estado VARCHAR(20) NOT NULL DEFAULT 'completada'
+        CHECK (estado IN ('pendiente', 'completada', 'anulada')),
+    observaciones TEXT,
+
+    CONSTRAINT fk_venta_cliente 
+        FOREIGN KEY (id_cliente) 
+        REFERENCES cliente(id_cliente),
+
+    CONSTRAINT fk_venta_empleado 
+        FOREIGN KEY (id_empleado) 
+        REFERENCES empleado(id_empleado)
+);
+
+-- 9. DETALLE_VENTA
+
+CREATE TABLE detalle_venta (
+    id_detalle SERIAL PRIMARY KEY,
+    id_venta INT NOT NULL,
+    id_producto INT NOT NULL,
+    cantidad INT NOT NULL CHECK (cantidad > 0),
+    precio_unitario NUMERIC(10,2) NOT NULL CHECK (precio_unitario >= 0),
+    descuento_linea NUMERIC(10,2) NOT NULL DEFAULT 0 CHECK (descuento_linea >= 0),
+    subtotal_linea NUMERIC(10,2) NOT NULL CHECK (subtotal_linea >= 0),
+
+    CONSTRAINT fk_det_venta 
+        FOREIGN KEY (id_venta) 
+        REFERENCES venta(id_venta)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_det_producto 
+        FOREIGN KEY (id_producto) 
+        REFERENCES producto(id_producto)
+);
+
+-- Búsquedas frecuentes de productos por nombre
+CREATE INDEX idx_producto_nombre
+ON producto(nombre);
+
+-- Filtro de productos por categoría
+CREATE INDEX idx_producto_categoria
+ON producto(id_categoria);
+
+-- Reportes e historial de ventas por fecha
+CREATE INDEX idx_venta_fecha
+ON venta(fecha_venta);
+
+-- Historial de compras por cliente
+CREATE INDEX idx_venta_cliente
+ON venta(id_cliente);
+
+-- JOIN frecuente entre detalle_venta y venta
+CREATE INDEX idx_detalle_venta_id
+ON detalle_venta(id_venta);
+
+-- Reportes de stock bajo
+CREATE INDEX idx_producto_stock
+ON producto(stock);
+
+--  Vistas para reportes y dashboard
+CREATE OR REPLACE VIEW v_stock_bajo AS
+SELECT
+    p.id_producto,
+    p.sku,
+    p.nombre AS producto,
+    c.nombre AS categoria,
+    m.nombre AS marca,
+    p.stock,
+    p.stock_minimo,
+    (p.stock_minimo - p.stock) AS unidades_faltantes
+FROM producto p
+JOIN categoria c ON c.id_categoria = p.id_categoria
+JOIN marca m ON m.id_marca = p.id_marca
+WHERE p.stock <= p.stock_minimo
+  AND p.activo = TRUE;
+
+CREATE OR REPLACE VIEW v_ventas_diarias AS
+SELECT
+    DATE(fecha_venta) AS dia,
+    COUNT(*) AS num_ventas,
+    SUM(total) AS ingreso_total,
+    AVG(total) AS ticket_promedio
+FROM venta
+WHERE estado = 'completada'
+GROUP BY DATE(fecha_venta);
+
 -- 1. CATEGORIAS
--- ------------------------------------------------------------
 INSERT INTO categoria (nombre, descripcion) VALUES
 ('Labiales', 'Productos para labios como lipstick, balm, lip oil y lip tint.'),
 ('Glosses', 'Brillos labiales con acabado glossy o plumping.'),
@@ -28,10 +234,7 @@ INSERT INTO categoria (nombre, descripcion) VALUES
 ('Lip Oils', 'Aceites labiales con color o tratamiento.'),
 ('Skin Tints', 'Tintes ligeros de piel con cobertura natural.');
 
--- ------------------------------------------------------------
 -- 2. MARCAS
--- Usando únicamente las marcas solicitadas.
--- ------------------------------------------------------------
 INSERT INTO marca (nombre, pais_origen, descripcion) VALUES
 ('Dior', 'Francia', 'Marca de lujo con maquillaje, fragancias y skincare.'),
 ('Rare Beauty', 'Estados Unidos', 'Marca enfocada en maquillaje natural, blushes líquidos y productos inclusivos.'),
@@ -54,10 +257,7 @@ INSERT INTO marca (nombre, pais_origen, descripcion) VALUES
 ('Haus Labs', 'Estados Unidos', 'Marca de Lady Gaga con maquillaje clean y skincare-infused.'),
 ('Kosas', 'Estados Unidos', 'Marca enfocada en maquillaje con beneficios de skincare.');
 
--- ------------------------------------------------------------
 -- 3. PROVEEDORES
--- Proveedores ficticios realistas para la tienda.
--- ------------------------------------------------------------
 INSERT INTO proveedor (nombre, telefono, email, direccion, nit) VALUES
 ('Beauty Import Guatemala', '2450-1001', 'ventas@beautyimportgt.com', 'Zona 10, Ciudad de Guatemala', '9876543-1'),
 ('Luxury Makeup Distributors', '2450-1002', 'contacto@luxurymakeupgt.com', 'Zona 14, Ciudad de Guatemala', '9876543-2'),
@@ -85,11 +285,7 @@ INSERT INTO proveedor (nombre, telefono, email, direccion, nit) VALUES
 ('Soft Glam Wholesale', '2450-1024', 'ventas@softglamwholesale.com', 'Fraijanes, Guatemala', '9876543-24'),
 ('PinkyPie Supplier Group', '2450-1025', 'compras@pinkypiesupplier.com', 'Zona 10, Ciudad de Guatemala', '9876543-25');
 
--- ------------------------------------------------------------
 -- 4. PRODUCTOS
--- Productos realistas inspirados en líneas reales de las marcas.
--- Nota: precio_compra y precio_venta están pensados en quetzales.
--- ------------------------------------------------------------
 INSERT INTO producto (
     id_categoria, id_marca, id_proveedor, nombre, descripcion,
     precio_compra, precio_venta, stock, stock_minimo, sku, imagen, activo
@@ -108,7 +304,7 @@ INSERT INTO producto (
 
 -- NARS
 (5, 4, 7, 'NARS Radiant Creamy Concealer', 'Corrector cremoso de cobertura media a alta.', 175.00, 340.00, 20, 5, 'NARS-CONC-001', 'nars-radiant-creamy-concealer.jpg', TRUE),
-(4, 4, 8, 'NARS Light Reflecting Foundation', 'Base de acabado natural y luminoso.', 285.00, 535.00, 14, 4, 'NARS-FOUND-002', 'nars-light-reflecting-foundation.jpg', TRUE),
+(4, 4, 8, 'NARS Light Reflecting Foundation', 'Base de acabado natural y luminoso.', 285.00, 535.00, 3, 4, 'NARS-FOUND-002', 'nars-light-reflecting-foundation.jpg', TRUE),
 
 -- Too Faced
 (9, 5, 9, 'Too Faced Better Than Sex Mascara', 'Máscara de pestañas para volumen intenso.', 145.00, 295.00, 28, 7, 'TF-MASC-001', 'too-faced-better-than-sex.jpg', TRUE),
@@ -124,11 +320,11 @@ INSERT INTO producto (
 
 -- Tower 28
 (3, 8, 15, 'Tower 28 BeachPlease Cream Blush', 'Blush en crema para mejillas y labios.', 130.00, 255.00, 26, 6, 'T28-BLUSH-001', 'tower28-beachplease-blush.jpg', TRUE),
-(2, 8, 16, 'Tower 28 ShineOn Lip Jelly', 'Gloss labial hidratante con acabado juicy.', 120.00, 240.00, 24, 6, 'T28-GLOSS-002', 'tower28-shineon-lip-jelly.jpg', TRUE),
+(2, 8, 16, 'Tower 28 ShineOn Lip Jelly', 'Gloss labial hidratante con acabado juicy.', 120.00, 240.00, 5, 6, 'T28-GLOSS-002', 'tower28-shineon-lip-jelly.jpg', TRUE),
 
 -- Charlotte Tilbury
 (1, 9, 17, 'Charlotte Tilbury Matte Revolution Pillow Talk', 'Labial matte icónico en tono nude rosado.', 185.00, 365.00, 18, 5, 'CT-LIP-001', 'charlotte-pillow-talk-lipstick.jpg', TRUE),
-(13, 9, 18, 'Charlotte Tilbury Airbrush Flawless Setting Spray', 'Spray fijador para prolongar el maquillaje.', 180.00, 360.00, 20, 5, 'CT-SPRAY-002', 'charlotte-setting-spray.jpg', TRUE),
+(13, 9, 18, 'Charlotte Tilbury Airbrush Flawless Setting Spray', 'Spray fijador para prolongar el maquillaje.', 180.00, 360.00, 2, 5, 'CT-SPRAY-002', 'charlotte-setting-spray.jpg', TRUE),
 
 -- rhode
 (14, 10, 19, 'rhode Peptide Lip Treatment', 'Tratamiento labial hidratante con acabado glossy.', 95.00, 195.00, 30, 8, 'RHODE-LIP-001', 'rhode-peptide-lip-treatment.jpg', TRUE),
@@ -174,10 +370,7 @@ INSERT INTO producto (
 (5, 20, 14, 'Kosas Revealer Concealer', 'Corrector cremoso con acabado natural y beneficios skincare.', 155.00, 310.00, 24, 6, 'KOSAS-CONC-001', 'kosas-revealer-concealer.jpg', TRUE),
 (9, 20, 15, 'Kosas Soulgazer Mascara', 'Máscara para pestañas con definición y volumen ligero.', 135.00, 270.00, 21, 5, 'KOSAS-MASC-002', 'kosas-soulgazer-mascara.jpg', TRUE);
 
--- ------------------------------------------------------------
 -- 5. CLIENTES
--- Clientes ficticios realistas para pruebas de ventas.
--- ------------------------------------------------------------
 INSERT INTO cliente (nombre, apellido, email, telefono, direccion, fecha_registro) VALUES
 ('Valeria', 'Castillo', 'valeria.castillo@email.com', '5010-1001', 'Zona 10, Ciudad de Guatemala', '2026-01-05'),
 ('Camila', 'Morales', 'camila.morales@email.com', '5010-1002', 'Zona 15, Ciudad de Guatemala', '2026-01-06'),
@@ -205,10 +398,7 @@ INSERT INTO cliente (nombre, apellido, email, telefono, direccion, fecha_registr
 ('Marcela', 'Padilla', 'marcela.padilla@email.com', '5010-1024', 'Zona 3, Ciudad de Guatemala', '2026-02-02'),
 ('Claudia', 'Mejía', 'claudia.mejia@email.com', '5010-1025', 'Zona 10, Ciudad de Guatemala', '2026-02-03');
 
--- ------------------------------------------------------------
 -- 6. EMPLEADOS
--- Personal de la tienda.
--- ------------------------------------------------------------
 INSERT INTO empleado (nombre, apellido, email, telefono, puesto, fecha_contratacion, activo) VALUES
 ('Daniela', 'Rodas', 'daniela.rodas@pinkypie.com', '5020-1001', 'Administradora', '2025-11-01', TRUE),
 ('Melanie', 'Cifuentes', 'melanie.cifuentes@pinkypie.com', '5020-1002', 'Vendedora', '2025-11-03', TRUE),
@@ -236,42 +426,36 @@ INSERT INTO empleado (nombre, apellido, email, telefono, puesto, fecha_contratac
 ('Ivanna', 'López', 'ivanna.lopez@pinkypie.com', '5020-1024', 'Asesora de maquillaje', '2025-12-06', TRUE),
 ('Paula', 'Quiñónez', 'paula.quinonez@pinkypie.com', '5020-1025', 'Vendedora', '2025-12-07', TRUE);
 
--- ------------------------------------------------------------
--- 7. USUARIOS
--- Password hash de ejemplo para pruebas.
--- Después se puede reemplazar por hashes reales generados con bcrypt.
--- ------------------------------------------------------------
-INSERT INTO usuario (id_empleado, username, password_hash, rol, activo, ultimo_login) VALUES
-(1, 'admin', '$2a$10$ejemploHashTemporalParaAdmin123', 'admin', TRUE, '2026-04-01 09:00:00-06'),
-(2, 'melanie', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 09:15:00-06'),
-(3, 'ashley', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 09:20:00-06'),
-(4, 'valentina', '$2a$10$ejemploHashTemporalParaSupervisor123', 'supervisor', TRUE, '2026-04-01 09:30:00-06'),
-(5, 'maria', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 10:00:00-06'),
-(6, 'sara', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 10:15:00-06'),
-(7, 'antonella', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 10:25:00-06'),
-(8, 'flor', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 10:40:00-06'),
-(9, 'diana', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 11:00:00-06'),
-(10, 'paulina', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 11:05:00-06'),
-(11, 'majo', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 11:25:00-06'),
-(12, 'julieta', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 11:35:00-06'),
-(13, 'rocio', '$2a$10$ejemploHashTemporalParaSupervisor123', 'supervisor', TRUE, '2026-04-01 12:00:00-06'),
-(14, 'ana', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 12:20:00-06'),
-(15, 'lorena', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 12:40:00-06'),
-(16, 'fatima', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 13:00:00-06'),
-(17, 'emilia', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 13:20:00-06'),
-(18, 'michelle', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 13:45:00-06'),
-(19, 'gabriela', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 14:00:00-06'),
-(20, 'josefina', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 14:15:00-06'),
-(21, 'ariana', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 14:30:00-06'),
-(22, 'laura', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 15:00:00-06'),
-(23, 'karla', '$2a$10$ejemploHashTemporalParaSupervisor123', 'supervisor', TRUE, '2026-04-01 15:20:00-06'),
-(24, 'ivanna', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 15:40:00-06'),
-(25, 'paula', '$2a$10$ejemploHashTemporalParaDemo123', 'vendedor', TRUE, '2026-04-01 16:00:00-06');
 
--- ------------------------------------------------------------
+-- 7. USUARIOS hashes generador con bycript
+INSERT INTO usuario (id_empleado, username, password_hash, rol, activo, ultimo_login) VALUES
+(1, 'admin', '$2b$10$XWgG/ITs.sbVEs3iiMVV5e84VBJPh7OT1t5uGpxH2zytnoNF1zoo.', 'admin', TRUE, '2026-04-01 09:00:00-06'),
+(2, 'melanie', '$2b$10$7u2wKaOOTiy71T47BKAmPOf2tRx13976aTkIY6GtKu74fHsye2QBy', 'vendedor', TRUE, '2026-04-01 09:15:00-06'),
+(3, 'ashley', '$2b$10$O1qgWTZpDdk3hp19uTtrZuEhCMBu9RvmVt0a9OJpfksRZ1uvn3Fju', 'vendedor', TRUE, '2026-04-01 09:20:00-06'),
+(4, 'valentina', '$2b$10$XIvoXkh664MBWvbAeB9e/dh8jYwupFAggMzd6EcUNhaIxdhKIS', 'supervisor', TRUE, '2026-04-01 09:30:00-06'),
+(5, 'maria', '$2b$10$JveetaZXo4OONR0ZbX.QqOTNhAHdu00/QSjOuobnkOldby8q7H4sK', 'vendedor', TRUE, '2026-04-01 10:00:00-06'),
+(6, 'sara', '$2b$10$VO1kmIEmKvDDkXFlCJfV8Ohu1ac9Ei2HAA03ZKM9PQu8pYwojTuAa', 'vendedor', TRUE, '2026-04-01 10:15:00-06'),
+(7, 'antonella', '$2b$10$p8EzWRTWX33PYropXvyiueJsJYpZmc81.a5EEHwP8ZQyCNBWm6H2', 'vendedor', TRUE, '2026-04-01 10:25:00-06'),
+(8, 'flor', '$2b$10$z1851HhCzfhngCs5mgDkOuinwIk8Eh8SH2oYimyp7E3tOe2zbK6zi', 'vendedor', TRUE, '2026-04-01 10:40:00-06'),
+(9, 'diana', '$2b$10$.omrvNUbEmbSUEXHIf9LGeJAfF5LOz3uB.8BE74Mu7xwVtWelToeW', 'vendedor', TRUE, '2026-04-01 11:00:00-06'),
+(10, 'paulina', '$2b$10$sj9ZEAQJZtkuS66wMVKEt.5tqnNjZucVHgPmk.eQBQT/AVzgZX/a1', 'vendedor', TRUE, '2026-04-01 11:05:00-06'),
+(11, 'majo', '$2b$10$MbwogoKorjvPfkbgqkev2OlCLMebFfTqAZQvqPRWCzx6qCj8y/DO', 'vendedor', TRUE, '2026-04-01 11:25:00-06'),
+(12, 'julieta', '$2b$10$OuuuqsX.T.XTfM0nd3h.P./Qs1V78pgCTsTmsYmst8.IEDZZNmMc2', 'vendedor', TRUE, '2026-04-01 11:35:00-06'),
+(13, 'rocio', '$2b$10$jVAHMsDhIoj7Hf1soUSqQeo/L7x59dvA9NwtpdEdb0z4Ty43nXgFa', 'supervisor', TRUE, '2026-04-01 12:00:00-06'),
+(14, 'ana', '$2b$10$MhjBf6OutzVtQMIsMxYkueYFk1LkOLiBgsY.PdUeMybC63MGYtuy', 'vendedor', TRUE, '2026-04-01 12:20:00-06'),
+(15, 'lorena', '$2b$10$KHIthM6iaqTi9oB3S67Tu.FDWMZ61qGHH1yW1doek1mVaC7ncegi', 'vendedor', TRUE, '2026-04-01 12:40:00-06'),
+(16, 'fatima', '$2b$10$armPL3t4ZK4eoFNRLBDDuehh6L3lgIzaKzzbTviP7tJ9JB/HyaVr2', 'vendedor', TRUE, '2026-04-01 13:00:00-06'),
+(17, 'emilia', '$2b$10$Znq3umRg8iDNfDs3PP.WEu85gUYWH1NOAhNPQnyykHGG7G1i.WR5W', 'vendedor', TRUE, '2026-04-01 13:20:00-06'),
+(18, 'michelle', '$2b$10$hhuF/Pz8Bfk9/Jbu2fD9O.X9vKVYWRbH1Efn..2FWSLBe9doFEsW', 'vendedor', TRUE, '2026-04-01 13:45:00-06'),
+(19, 'gabriela', '$2b$10$Da6ovfG6TrRzej/i8cYJOou9jrSSQELmmW1r6zmM2JUZSerpZP8ua', 'vendedor', TRUE, '2026-04-01 14:00:00-06'),
+(20, 'josefina', '$2b$10$TnNcFVe3T/qJ98ToCY5z.4/qV3/6xUhh9rTMiNykQTxDcjvhTkm..', 'vendedor', TRUE, '2026-04-01 14:15:00-06'),
+(21, 'ariana', '$2b$10$Cs95P5q4IunTaJ68T.Mi4e2InAN01KRIyBHV.BIxim.hKez.6mC7qw', 'vendedor', TRUE, '2026-04-01 14:30:00-06'),
+(22, 'laura', '$2b$10$./z5rjOOGnyguDRAQS0C7.sYY.bSBuO0tqgcbB5lZneob86FKI7ly', 'vendedor', TRUE, '2026-04-01 15:00:00-06'),
+(23, 'karla', '$2b$10$f.GR6oeH5DwdYJHZ8HGQM./BBYbJrBofN8AQvozj6M3HXsSOSX5D.', 'supervisor', TRUE, '2026-04-01 15:20:00-06'),
+(24, 'ivanna', '$2b$10$PqZJVAUTbkYzmNVv7umfouGUhSQqUnmIh2HMk4R73sYnER1Gd5nQ2', 'vendedor', TRUE, '2026-04-01 15:40:00-06'),
+(25, 'paula', '$2b$10$PddUsTeGn4luoerKI.pA.okYZHfdd94dsbZ1iOFeFu9Qz7z3gNTu', 'vendedor', TRUE, '2026-04-01 16:00:00-06');
+
 -- 8. VENTAS
--- Ventas de prueba para alimentar reportes.
--- ------------------------------------------------------------
 INSERT INTO venta (id_cliente, id_empleado, fecha_venta, subtotal, descuento, total, estado, observaciones) VALUES
 (1, 2, '2026-02-01 10:15:00-06', 665.00, 0.00, 665.00, 'completada', 'Compra de productos para labios y rostro.'),
 (2, 3, '2026-02-01 11:30:00-06', 725.00, 25.00, 700.00, 'completada', 'Descuento aplicado por promoción de apertura.'),
@@ -299,11 +483,7 @@ INSERT INTO venta (id_cliente, id_empleado, fecha_venta, subtotal, descuento, to
 (24, 7, '2026-02-12 14:10:00-06', 905.00, 105.00, 800.00, 'completada', 'Compra de lujo.'),
 (25, 8, '2026-02-13 16:00:00-06', 650.00, 0.00, 650.00, 'completada', 'Compra final del día.');
 
--- ------------------------------------------------------------
 -- 9. DETALLE_VENTA
--- Detalles relacionados con las ventas anteriores.
--- Los precios unitarios coinciden con precio_venta de producto.
--- ------------------------------------------------------------
 INSERT INTO detalle_venta (id_venta, id_producto, cantidad, precio_unitario, descuento_linea, subtotal_linea) VALUES
 -- Venta 1: total 665
 (1, 1, 1, 385.00, 0.00, 385.00),
