@@ -9,7 +9,8 @@ const {
   obtenerVentasPorCategoria,
   obtenerProductosMasVendidos,
   obtenerStockBajo,
-  obtenerVentasDiarias
+  obtenerVentasDiarias,
+  obtenerDashboard
 } = require('../controllers/reportesController');
 
 // Rutas de reportes
@@ -20,5 +21,6 @@ router.get('/ventas-categoria', obtenerVentasPorCategoria);
 router.get('/productos-mas-vendidos', obtenerProductosMasVendidos);
 router.get('/stock-bajo', obtenerStockBajo);
 router.get('/ventas-diarias', obtenerVentasDiarias);
+router.get('/dashboard', obtenerDashboard);
 
 module.exports = router;

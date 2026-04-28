@@ -193,6 +193,51 @@ const obtenerVentasDiarias = async (req, res) => {
   }
 };
 
+// Resumen general para dashboard
+const obtenerDashboard = async (req, res) => {
+  try {
+    const resumenResult = await pool.query(`
+      SELECT
+        COALESCE(SUM(total), 0) AS ventas_mes,
+        (SELECT COUNT(*) FROM cliente) AS total_clientes,
+        (SELECT COUNT(*) FROM venta WHERE estado = 'completada') AS ordenes_totales,
+        (
+          SELECT COALESCE(SUM(dv.cantidad), 0)
+          FROM detalle_venta dv
+          JOIN venta v ON v.id_venta = dv.id_venta
+          WHERE v.estado = 'completada'
+        ) AS productos_vendidos
+      FROM venta
+      WHERE estado = 'completada'
+        AND DATE_TRUNC('month', fecha_venta) = DATE_TRUNC('month', CURRENT_DATE);
+    `);
+
+    const recientesResult = await pool.query(`
+      SELECT
+        v.id_venta,
+        v.fecha_venta,
+        CONCAT(c.nombre, ' ', c.apellido) AS cliente,
+        v.total,
+        v.estado
+      FROM venta v
+      JOIN cliente c ON c.id_cliente = v.id_cliente
+      WHERE v.estado = 'completada'
+      ORDER BY v.fecha_venta DESC
+      LIMIT 4;
+    `);
+
+    res.json({
+      resumen: resumenResult.rows[0],
+      ventas_recientes: recientesResult.rows
+    });
+  } catch (error) {
+    console.error('Error en dashboard:', error);
+    res.status(500).json({
+      mensaje: 'Error al obtener datos del dashboard'
+    });
+  }
+};
+
 module.exports = {
   obtenerProductosInventario,
   obtenerVentasGenerales,
@@ -200,5 +245,6 @@ module.exports = {
   obtenerVentasPorCategoria,
   obtenerProductosMasVendidos,
   obtenerStockBajo,
-  obtenerVentasDiarias
+  obtenerVentasDiarias,
+  obtenerDashboard
 };
