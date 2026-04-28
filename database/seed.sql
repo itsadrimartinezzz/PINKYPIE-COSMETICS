@@ -1,12 +1,5 @@
--- ============================================================
---  Proyecto 2 - PINKYPIE
---  Seed de datos realistas
---  Tienda de maquillaje
--- ============================================================
-
--- ------------------------------------------------------------
 -- 1. CATEGORIAS
--- ------------------------------------------------------------
+
 INSERT INTO categoria (nombre, descripcion) VALUES
 ('Labiales', 'Productos para labios como lipstick, balm, lip oil y lip tint.'),
 ('Glosses', 'Brillos labiales con acabado glossy o plumping.'),
@@ -34,10 +27,9 @@ INSERT INTO categoria (nombre, descripcion) VALUES
 ('Lip Oils', 'Aceites labiales con color o tratamiento.'),
 ('Skin Tints', 'Tintes ligeros de piel con cobertura natural.');
 
--- ------------------------------------------------------------
+
 -- 2. MARCAS
--- Usando únicamente las marcas solicitadas.
--- ------------------------------------------------------------
+
 INSERT INTO marca (nombre, pais_origen, descripcion) VALUES
 ('Dior', 'Francia', 'Marca de lujo con maquillaje, fragancias y skincare.'),
 ('Rare Beauty', 'Estados Unidos', 'Marca enfocada en maquillaje natural, blushes líquidos y productos inclusivos.'),
@@ -60,10 +52,9 @@ INSERT INTO marca (nombre, pais_origen, descripcion) VALUES
 ('Haus Labs', 'Estados Unidos', 'Marca de Lady Gaga con maquillaje clean y skincare-infused.'),
 ('Kosas', 'Estados Unidos', 'Marca enfocada en maquillaje con beneficios de skincare.');
 
--- ------------------------------------------------------------
+
 -- 3. PROVEEDORES
--- Proveedores ficticios realistas para la tienda.
--- ------------------------------------------------------------
+
 INSERT INTO proveedor (nombre, telefono, email, direccion, nit) VALUES
 ('Beauty Import Guatemala', '2450-1001', 'ventas@beautyimportgt.com', 'Zona 10, Ciudad de Guatemala', '9876543-1'),
 ('Luxury Makeup Distributors', '2450-1002', 'contacto@luxurymakeupgt.com', 'Zona 14, Ciudad de Guatemala', '9876543-2'),
@@ -91,11 +82,9 @@ INSERT INTO proveedor (nombre, telefono, email, direccion, nit) VALUES
 ('Soft Glam Wholesale', '2450-1024', 'ventas@softglamwholesale.com', 'Fraijanes, Guatemala', '9876543-24'),
 ('PinkyPie Supplier Group', '2450-1025', 'compras@pinkypiesupplier.com', 'Zona 10, Ciudad de Guatemala', '9876543-25');
 
--- ------------------------------------------------------------
+
 -- 4. PRODUCTOS
--- Productos realistas inspirados en líneas reales de las marcas.
--- Nota: precio_compra y precio_venta están pensados en quetzales.
--- ------------------------------------------------------------
+
 INSERT INTO producto (
     id_categoria, id_marca, id_proveedor, nombre, descripcion,
     precio_compra, precio_venta, stock, stock_minimo, sku, imagen, activo

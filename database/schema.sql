@@ -1,9 +1,4 @@
--- ============================================================
---  Usuario requerido: proy2
---  Contraseña requerida: secret
--- ============================================================
-
--- Limpieza para poder ejecutar el script varias veces
+-- Para  ejecutar el script varias veces
 DROP VIEW IF EXISTS v_stock_bajo;
 DROP VIEW IF EXISTS v_ventas_diarias;
 
@@ -20,7 +15,6 @@ DROP TABLE IF EXISTS categoria;
 
 -- 1. CATEGORIA
 -- Agrupa los productos de maquillaje
--- Ejemplo: Labios, Rostro, Ojos, Brochas, Skincare
 CREATE TABLE categoria (
     id_categoria SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL UNIQUE,
@@ -28,7 +22,6 @@ CREATE TABLE categoria (
 );
 
 -- 2. MARCA
--- Representa la marca comercial del producto
 CREATE TABLE marca (
     id_marca SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL UNIQUE,
@@ -37,7 +30,6 @@ CREATE TABLE marca (
 );
 
 -- 3. PROVEEDOR
--- Empresa que le vende productos a la tienda
 CREATE TABLE proveedor (
     id_proveedor SERIAL PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
@@ -48,8 +40,7 @@ CREATE TABLE proveedor (
 );
 
 -- 4. PRODUCTO
--- Producto vendible dentro de la tienda
--- Se relaciona con categoría, marca y proveedor
+
 CREATE TABLE producto (
     id_producto SERIAL PRIMARY KEY,
     id_categoria INT NOT NULL,
@@ -79,7 +70,7 @@ CREATE TABLE producto (
 );
 
 -- 5. CLIENTE
--- Persona que realiza compras en la tienda
+
 CREATE TABLE cliente (
     id_cliente SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -91,7 +82,7 @@ CREATE TABLE cliente (
 );
 
 -- 6. EMPLEADO
--- Personal de la tienda que atiende ventas
+
 CREATE TABLE empleado (
     id_empleado SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -104,8 +95,7 @@ CREATE TABLE empleado (
 );
 
 -- 7. USUARIO
--- Credenciales de acceso al sistema
--- Relación 1:1 con empleado
+
 CREATE TABLE usuario (
     id_usuario SERIAL PRIMARY KEY,
     id_empleado INT NOT NULL UNIQUE,
@@ -122,8 +112,7 @@ CREATE TABLE usuario (
 );
 
 -- 8. VENTA
--- Encabezado de una venta
--- Una venta pertenece a un cliente y es atendida por un empleado
+
 CREATE TABLE venta (
     id_venta SERIAL PRIMARY KEY,
     id_cliente INT NOT NULL,
@@ -146,8 +135,7 @@ CREATE TABLE venta (
 );
 
 -- 9. DETALLE_VENTA
--- Productos incluidos dentro de una venta
--- Resuelve la relación N:M entre venta y producto
+
 CREATE TABLE detalle_venta (
     id_detalle SERIAL PRIMARY KEY,
     id_venta INT NOT NULL,
