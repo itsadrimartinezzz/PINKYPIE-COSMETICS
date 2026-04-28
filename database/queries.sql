@@ -120,10 +120,6 @@ ORDER BY dia DESC;
 
 
 
--- 5. TRANSACCIÓN DE REFERENCIA
+-- 5. TRANSACCIÓN 
 
-
--- ------------------------------------------------------------
--- Esta transacción es el modelo que se implementará en el backend
--- cuando se registre una venta desde la página web.
--- ------------------------------------------------------------
+-- Esta transacción es el modelo que se implementará en el backend cuando se registre una venta desde la página web.
