@@ -120,6 +120,67 @@ ORDER BY dia DESC;
 
 
 
--- 5. TRANSACCIÓN 
+-- 5. TRANSACCIÓN DE REFERENCIA
 
--- Esta transacción es el modelo que se implementará en el backend cuando se registre una venta desde la página web.
+BEGIN;
+
+-- 1. Validar y bloquear producto para evitar cambios simultáneos
+SELECT 
+    id_producto, 
+    nombre, 
+    precio_venta, 
+    stock
+FROM producto
+WHERE id_producto = 1
+  AND activo = TRUE
+FOR UPDATE;
+
+-- 2. Insertar encabezado de venta
+INSERT INTO venta (
+    id_cliente,
+    id_empleado,
+    subtotal,
+    descuento,
+    total,
+    estado,
+    observaciones
+)
+VALUES (
+    1,
+    2,
+    385.00,
+    0.00,
+    385.00,
+    'completada',
+    'Venta de ejemplo registrada con transacción'
+)
+RETURNING id_venta;
+
+-- 3. Insertar detalle de venta
+INSERT INTO detalle_venta (
+    id_venta,
+    id_producto,
+    cantidad,
+    precio_unitario,
+    descuento_linea,
+    subtotal_linea
+)
+VALUES (
+    currval('venta_id_venta_seq'),
+    1,
+    1,
+    385.00,
+    0.00,
+    385.00
+);
+
+-- 4. Descontar stock del producto vendido
+UPDATE producto
+SET stock = stock - 1
+WHERE id_producto = 1
+  AND stock >= 1;
+
+COMMIT;
+
+-- Si ocurre un error en cualquier paso, se ejecuta:
+-- ROLLBACK;
