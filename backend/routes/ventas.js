@@ -5,11 +5,13 @@ const router = express.Router();
 const {
   obtenerVentas,
   obtenerVentaPorId,
-  crearVenta
+  crearVenta,
+  obtenerEmpleadosActivos
 } = require('../controllers/ventasController');
 
 // Rutas de ventas
 router.get('/', obtenerVentas);
+router.get('/empleados', obtenerEmpleadosActivos);
 router.get('/:id', obtenerVentaPorId);
 router.post('/', crearVenta);
 

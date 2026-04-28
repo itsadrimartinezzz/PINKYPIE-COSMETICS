@@ -244,8 +244,32 @@ const crearVenta = async (req, res) => {
   }
 };
 
+// Obtener empleados activos para crear ventas
+const obtenerEmpleadosActivos = async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        id_empleado,
+        nombre,
+        apellido,
+        puesto
+      FROM empleado
+      WHERE activo = TRUE
+      ORDER BY nombre, apellido;
+    `);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error al obtener empleados:', error);
+    res.status(500).json({
+      mensaje: 'Error al obtener empleados'
+    });
+  }
+};
+
 module.exports = {
   obtenerVentas,
   obtenerVentaPorId,
-  crearVenta
+  crearVenta,
+  obtenerEmpleadosActivos
 };
