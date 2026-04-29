@@ -89,6 +89,27 @@ docker ps
 ```bash
 docker compose logs
 ```
+---
+
+##  Entrar a la base de datos
+
+Para ingresar a PostgreSQL desde Docker:
+
+```txt
+docker exec -it pinkypie_db psql -U proy2 -d PINKYPIE
+```
+
+Una vez dentro, se pueden ejecutar consultas como:
+
+```txt
+SELECT * FROM usuario;
+```
+```txt
+SELECT * FROM producto;
+```
+```txt
+SELECT * FROM cliente;
+```
 
 ---
 
