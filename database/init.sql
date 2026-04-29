@@ -372,7 +372,7 @@ INSERT INTO producto (
 
 -- 5. CLIENTES
 INSERT INTO cliente (nombre, apellido, email, telefono, direccion, fecha_registro) VALUES
-('Valeria', 'Castillo', 'valeria.castillo@email.com', '5010-1001', 'Zona 10, Ciudad de Guatemala', '2026-01-05'),
+('Adriana', 'Martínez', 'adriana.martinez@email.com', '5010-1001', 'Zona 10, Ciudad de Guatemala', '2026-01-05'),
 ('Camila', 'Morales', 'camila.morales@email.com', '5010-1002', 'Zona 15, Ciudad de Guatemala', '2026-01-06'),
 ('Fernanda', 'López', 'fernanda.lopez@email.com', '5010-1003', 'Mixco, Guatemala', '2026-01-08'),
 ('Andrea', 'Herrera', 'andrea.herrera@email.com', '5010-1004', 'Zona 16, Ciudad de Guatemala', '2026-01-09'),
