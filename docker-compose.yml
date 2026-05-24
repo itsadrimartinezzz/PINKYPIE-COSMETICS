@@ -5,7 +5,7 @@ services:
     restart: always
     environment:
       POSTGRES_DB: PINKYPIE
-      POSTGRES_USER: proy2
+      POSTGRES_USER: proy3
       POSTGRES_PASSWORD: secret
     ports:
       - "5432:5432"
