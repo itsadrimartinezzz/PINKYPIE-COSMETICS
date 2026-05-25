@@ -1,7 +1,3 @@
--- ========================================
--- PROYECTO 3 - SISTEMA DE ROLES Y PERMISOS
--- PINKYPIE MAKEUP STORE
--- ========================================
 
 -- Limpiar roles existentes si existen
 DO $$ 
@@ -27,9 +23,7 @@ REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM PUBLIC;
 REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM PUBLIC;
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
 
--- ========================================
 -- 1. ROL: ADMINISTRADOR
--- ========================================
 
 CREATE ROLE role_admin;
 
@@ -50,10 +44,7 @@ GRANT SELECT ON v_ventas_diarias TO role_admin;
 
 COMMENT ON ROLE role_admin IS 'Administrador con acceso total';
 
-
--- ========================================
 -- 2. ROL: GERENTE
--- ========================================
 
 CREATE ROLE role_gerente;
 
@@ -84,10 +75,7 @@ GRANT SELECT ON v_ventas_diarias TO role_gerente;
 
 COMMENT ON ROLE role_gerente IS 'Gerente de tienda - Gestión y reportes';
 
-
--- ========================================
 -- 3. ROL: VENDEDOR
--- ========================================
 
 CREATE ROLE role_vendedor;
 
@@ -111,9 +99,7 @@ GRANT SELECT ON v_ventas_diarias TO role_vendedor;
 COMMENT ON ROLE role_vendedor IS 'Vendedor - Operaciones de venta';
 
 
--- ========================================
 -- 4. ROL: INVENTARIO
--- ========================================
 
 CREATE ROLE role_inventario;
 
@@ -131,9 +117,7 @@ GRANT SELECT ON v_stock_bajo TO role_inventario;
 COMMENT ON ROLE role_inventario IS 'Encargado de inventario';
 
 
--- ========================================
 -- 5. ROL: CONSULTA
--- ========================================
 
 CREATE ROLE role_consulta;
 
@@ -155,13 +139,10 @@ COMMENT ON ROLE role_consulta IS 'Solo lectura - Auditoría';
 -- Mensaje de confirmación
 DO $$
 BEGIN
-    RAISE NOTICE '========================================';
     RAISE NOTICE 'ROLES CREADOS EXITOSAMENTE';
-    RAISE NOTICE '========================================';
-    RAISE NOTICE '✓ role_admin - Administrador total';
-    RAISE NOTICE '✓ role_gerente - Gestión y reportes';
-    RAISE NOTICE '✓ role_vendedor - Operaciones de venta';
-    RAISE NOTICE '✓ role_inventario - Control de stock';
-    RAISE NOTICE '✓ role_consulta - Solo lectura';
-    RAISE NOTICE '========================================';
+    RAISE NOTICE 'role_admin - Administrador total';
+    RAISE NOTICE 'role_gerente - Gestión y reportes';
+    RAISE NOTICE 'role_vendedor - Operaciones de venta';
+    RAISE NOTICE 'role_inventario - Control de stock';
+    RAISE NOTICE 'role_consulta - Solo lectura';
 END $$;

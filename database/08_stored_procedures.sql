@@ -1,23 +1,5 @@
--- PROYECTO 3 - STORED PROCEDURES
--- PINKYPIE MAKEUP STORE
--- Stored Procedures para operaciones críticas del negocio
 
--- ============================================================
 -- STORED PROCEDURE 1: REGISTRAR VENTA COMPLETA
--- ============================================================
--- Propósito: Registra una venta con múltiples productos, valida stock,
---            actualiza inventario y maneja errores automáticamente.
---
--- Flujo:
---   1. Valida que cliente y empleado existan
---   2. Crea el encabezado de la venta
---   3. Por cada producto:
---      - Verifica que exista y tenga stock suficiente
---      - Inserta el detalle de venta
---      - Descuenta del inventario
---   4. Actualiza los totales de la venta
---
--- En caso de error en cualquier paso, se revierte TODA la operación (ROLLBACK)
 
 CREATE OR REPLACE FUNCTION sp_registrar_venta(
     p_id_cliente INT,
@@ -113,12 +95,7 @@ $$;
 COMMENT ON FUNCTION sp_registrar_venta IS 'Registra una venta completa con validaciones y control de stock';
 
 
--- ============================================================
 -- STORED PROCEDURE 2: ACTUALIZAR STOCK DE PRODUCTO
--- ============================================================
--- Propósito: Actualiza el inventario de un producto, ya sea entrada
---            (compra a proveedor) o salida (ajuste de inventario).
---            Valida que no quede en negativo y alerta si está bajo el mínimo.
 
 CREATE OR REPLACE FUNCTION sp_actualizar_stock(
     p_id_producto INT,
@@ -184,11 +161,7 @@ $$;
 COMMENT ON FUNCTION sp_actualizar_stock IS 'Actualiza stock de producto con validaciones';
 
 
--- ============================================================
 -- STORED PROCEDURE 3: ANULAR VENTA
--- ============================================================
--- Propósito: Anula una venta completada y devuelve todos los productos
---            vendidos al inventario. Útil para devoluciones o cancelaciones.
 
 CREATE OR REPLACE FUNCTION sp_anular_venta(
     p_id_venta INT,
@@ -243,14 +216,7 @@ $$;
 COMMENT ON FUNCTION sp_anular_venta IS 'Anula una venta y devuelve stock al inventario';
 
 
--- ============================================================
 -- STORED PROCEDURE 4: REPORTE DE VENTAS POR PERÍODO
--- ============================================================
--- Propósito: Genera un reporte de ventas agrupado por día dentro de
---            un rango de fechas. Útil para análisis de tendencias y dashboards.
---
--- Retorna una tabla con: fecha, cantidad de ventas, monto total,
---                        ticket promedio y productos vendidos
 
 CREATE OR REPLACE FUNCTION sp_reporte_ventas_periodo(
     p_fecha_inicio DATE,
@@ -285,14 +251,7 @@ $$;
 COMMENT ON FUNCTION sp_reporte_ventas_periodo IS 'Genera reporte de ventas por período de fechas';
 
 
--- ============================================================
 -- STORED PROCEDURE 5: PRODUCTOS CON STOCK BAJO
--- ============================================================
--- Propósito: Identifica productos que están en o debajo de su stock mínimo.
---            Útil para alertas de reorden y gestión de inventario.
---
--- Retorna una tabla con información del producto, stock actual,
---         stock mínimo, faltante y datos del proveedor
 
 CREATE OR REPLACE FUNCTION sp_productos_bajo_stock()
 RETURNS TABLE(

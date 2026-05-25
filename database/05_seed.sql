@@ -216,7 +216,11 @@ INSERT INTO empleado (nombre, apellido, email, telefono, puesto, fecha_contratac
 ('Laura', 'Delgado', 'laura.delgado@pinkypie.com', '5020-1022', 'Vendedora', '2025-12-04', TRUE),
 ('Karla', 'Rosales', 'karla.rosales@pinkypie.com', '5020-1023', 'Supervisora', '2025-12-05', TRUE),
 ('Ivanna', 'López', 'ivanna.lopez@pinkypie.com', '5020-1024', 'Asesora de maquillaje', '2025-12-06', TRUE),
-('Paula', 'Quiñónez', 'paula.quinonez@pinkypie.com', '5020-1025', 'Vendedora', '2025-12-07', TRUE);
+('Paula', 'Quiñónez', 'paula.quinonez@pinkypie.com', '5020-1025', 'Vendedora', '2025-12-07', TRUE),
+('Gerente', 'Prueba', 'gerente.prueba@pinkypie.com', '5551-3001', 'Gerente de Tienda', '2026-04-01', TRUE),
+('Vendedor', 'Prueba', 'vendedor.prueba@pinkypie.com', '5551-3002', 'Vendedor', '2026-04-01', TRUE),
+('Inventario', 'Prueba', 'inventario.prueba@pinkypie.com', '5551-3003', 'Encargado de Inventario', '2026-04-01', TRUE),
+('Consulta', 'Prueba', 'consulta.prueba@pinkypie.com', '5551-3004', 'Analista de Consulta', '2026-04-01', TRUE);
 
 
 -- 7. USUARIOS hashes generador con bycript
@@ -224,7 +228,7 @@ INSERT INTO usuario (id_empleado, username, password_hash, rol, activo, ultimo_l
 (1, 'admin', '$2b$10$XWgG/ITs.sbVEs3iiMVV5e84VBJPh7OT1t5uGpxH2zytnoNF1zoo.', 'admin', TRUE, '2026-04-01 09:00:00-06'),
 (2, 'melanie', '$2b$10$7u2wKaOOTiy71T47BKAmPOf2tRx13976aTkIY6GtKu74fHsye2QBy', 'vendedor', TRUE, '2026-04-01 09:15:00-06'),
 (3, 'ashley', '$2b$10$O1qgWTZpDdk3hp19uTtrZuEhCMBu9RvmVt0a9OJpfksRZ1uvn3Fju', 'vendedor', TRUE, '2026-04-01 09:20:00-06'),
-(4, 'valentina', '$2b$10$XIvoXkh664MBWvbAeB9e/dh8jYwupFAggMzd6EcUNhaIxdhKIS', 'supervisor', TRUE, '2026-04-01 09:30:00-06'),
+(4, 'valentina', '$2b$10$XIvoXkh664MBWvbAeB9e/dh8jYwupFAggMzd6EcUNhaIxdhKIS', 'gerente', TRUE, '2026-04-01 09:30:00-06'),
 (5, 'maria', '$2b$10$JveetaZXo4OONR0ZbX.QqOTNhAHdu00/QSjOuobnkOldby8q7H4sK', 'vendedor', TRUE, '2026-04-01 10:00:00-06'),
 (6, 'sara', '$2b$10$VO1kmIEmKvDDkXFlCJfV8Ohu1ac9Ei2HAA03ZKM9PQu8pYwojTuAa', 'vendedor', TRUE, '2026-04-01 10:15:00-06'),
 (7, 'antonella', '$2b$10$p8EzWRTWX33PYropXvyiueJsJYpZmc81.a5EEHwP8ZQyCNBWm6H2', 'vendedor', TRUE, '2026-04-01 10:25:00-06'),
@@ -233,7 +237,7 @@ INSERT INTO usuario (id_empleado, username, password_hash, rol, activo, ultimo_l
 (10, 'paulina', '$2b$10$sj9ZEAQJZtkuS66wMVKEt.5tqnNjZucVHgPmk.eQBQT/AVzgZX/a1', 'vendedor', TRUE, '2026-04-01 11:05:00-06'),
 (11, 'majo', '$2b$10$MbwogoKorjvPfkbgqkev2OlCLMebFfTqAZQvqPRWCzx6qCj8y/DO', 'vendedor', TRUE, '2026-04-01 11:25:00-06'),
 (12, 'julieta', '$2b$10$OuuuqsX.T.XTfM0nd3h.P./Qs1V78pgCTsTmsYmst8.IEDZZNmMc2', 'vendedor', TRUE, '2026-04-01 11:35:00-06'),
-(13, 'rocio', '$2b$10$jVAHMsDhIoj7Hf1soUSqQeo/L7x59dvA9NwtpdEdb0z4Ty43nXgFa', 'supervisor', TRUE, '2026-04-01 12:00:00-06'),
+(13, 'rocio', '$2b$10$jVAHMsDhIoj7Hf1soUSqQeo/L7x59dvA9NwtpdEdb0z4Ty43nXgFa', 'gerente', TRUE, '2026-04-01 12:00:00-06'),
 (14, 'ana', '$2b$10$MhjBf6OutzVtQMIsMxYkueYFk1LkOLiBgsY.PdUeMybC63MGYtuy', 'vendedor', TRUE, '2026-04-01 12:20:00-06'),
 (15, 'lorena', '$2b$10$KHIthM6iaqTi9oB3S67Tu.FDWMZ61qGHH1yW1doek1mVaC7ncegi', 'vendedor', TRUE, '2026-04-01 12:40:00-06'),
 (16, 'fatima', '$2b$10$armPL3t4ZK4eoFNRLBDDuehh6L3lgIzaKzzbTviP7tJ9JB/HyaVr2', 'vendedor', TRUE, '2026-04-01 13:00:00-06'),
@@ -243,9 +247,13 @@ INSERT INTO usuario (id_empleado, username, password_hash, rol, activo, ultimo_l
 (20, 'josefina', '$2b$10$TnNcFVe3T/qJ98ToCY5z.4/qV3/6xUhh9rTMiNykQTxDcjvhTkm..', 'vendedor', TRUE, '2026-04-01 14:15:00-06'),
 (21, 'ariana', '$2b$10$Cs95P5q4IunTaJ68T.Mi4e2InAN01KRIyBHV.BIxim.hKez.6mC7qw', 'vendedor', TRUE, '2026-04-01 14:30:00-06'),
 (22, 'laura', '$2b$10$./z5rjOOGnyguDRAQS0C7.sYY.bSBuO0tqgcbB5lZneob86FKI7ly', 'vendedor', TRUE, '2026-04-01 15:00:00-06'),
-(23, 'karla', '$2b$10$f.GR6oeH5DwdYJHZ8HGQM./BBYbJrBofN8AQvozj6M3HXsSOSX5D.', 'supervisor', TRUE, '2026-04-01 15:20:00-06'),
+(23, 'karla', '$2b$10$f.GR6oeH5DwdYJHZ8HGQM./BBYbJrBofN8AQvozj6M3HXsSOSX5D.', 'gerente', TRUE, '2026-04-01 15:20:00-06'),
 (24, 'ivanna', '$2b$10$PqZJVAUTbkYzmNVv7umfouGUhSQqUnmIh2HMk4R73sYnER1Gd5nQ2', 'vendedor', TRUE, '2026-04-01 15:40:00-06'),
-(25, 'paula', '$2b$10$PddUsTeGn4luoerKI.pA.okYZHfdd94dsbZ1iOFeFu9Qz7z3gNTu', 'vendedor', TRUE, '2026-04-01 16:00:00-06');
+(25, 'paula', '$2b$10$PddUsTeGn4luoerKI.pA.okYZHfdd94dsbZ1iOFeFu9Qz7z3gNTu', 'vendedor', TRUE, '2026-04-01 16:00:00-06'),
+(26, 'gerente', '$2b$10$wStLS16y8tntOlwXDW4baest/gyOLAIBI83rKVcmoowGWoLaC92nS', 'gerente', TRUE, '2026-04-01 09:10:00-06'),
+(27, 'vendedor', '$2b$10$rtqYQihy5eOToE6DOb3zEezLyrx/R7ZP9SIEAa2wBT.OYtQrp1MFS', 'vendedor', TRUE, '2026-04-01 09:20:00-06'),
+(28, 'inventario', '$2b$10$RskVQZzIrtvYxgFO3D.ko.IHqnLunDDyD/7eBPhmKUbzVpkgj7Iwa', 'inventario', TRUE, '2026-04-01 09:30:00-06'),
+(29, 'consulta', '$2b$10$1BTer8RqRj0tqn012Vs4neFYgpckZhBOuwY37d1KcofG4B8T8sG2i', 'consulta', TRUE, '2026-04-01 09:40:00-06');
 
 -- 8. VENTAS
 INSERT INTO venta (id_cliente, id_empleado, fecha_venta, subtotal, descuento, total, estado, observaciones) VALUES
