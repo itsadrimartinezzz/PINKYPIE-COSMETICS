@@ -5,6 +5,7 @@ import {
   Users,
   ShoppingCart,
   BarChart3,
+  Database,
   LogOut
 } from 'lucide-react';
 import api from '../services/api';
@@ -32,31 +33,37 @@ function Sidebar() {
       nombre: 'Dashboard',
       ruta: '/dashboard',
       icono: LayoutDashboard,
-      roles: ['admin', 'gerente', 'vendedor', 'inventario', 'consulta', 'supervisor']
+      roles: ['admin', 'gerente', 'vendedor', 'inventario', 'consulta']
     },
     {
       nombre: 'Productos',
       ruta: '/productos',
       icono: Package,
-      roles: ['admin', 'gerente', 'vendedor', 'inventario', 'consulta', 'supervisor']
+      roles: ['admin', 'gerente', 'vendedor', 'inventario', 'consulta']
     },
     {
       nombre: 'Clientes',
       ruta: '/clientes',
       icono: Users,
-      roles: ['admin', 'gerente', 'vendedor', 'consulta', 'supervisor']
+      roles: ['admin', 'gerente', 'vendedor', 'consulta']
     },
     {
       nombre: 'Ventas',
       ruta: '/ventas',
       icono: ShoppingCart,
-      roles: ['admin', 'gerente', 'vendedor', 'consulta', 'supervisor']
+      roles: ['admin', 'gerente', 'vendedor', 'consulta']
     },
     {
       nombre: 'Reportes',
       ruta: '/reportes',
       icono: BarChart3,
-      roles: ['admin', 'gerente', 'consulta', 'supervisor']
+      roles: ['admin', 'gerente', 'consulta']
+    },
+    {
+      nombre: 'Operaciones BD',
+      ruta: '/procedures',
+      icono: Database,
+      roles: ['admin', 'gerente', 'inventario', 'consulta']
     }
   ];
 

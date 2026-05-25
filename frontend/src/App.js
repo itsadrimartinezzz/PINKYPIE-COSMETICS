@@ -6,6 +6,7 @@ import Productos from './pages/Productos';
 import Clientes from './pages/Clientes';
 import Ventas from './pages/Ventas';
 import Reportes from './pages/Reportes';
+import Procedures from './pages/Procedures';
 
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -22,7 +23,7 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute rolesPermitidos={['admin', 'gerente', 'vendedor', 'inventario', 'consulta', 'supervisor']}>
+            <ProtectedRoute rolesPermitidos={['admin', 'gerente', 'vendedor', 'inventario', 'consulta']}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -31,7 +32,7 @@ function App() {
         <Route
           path="/productos"
           element={
-            <ProtectedRoute rolesPermitidos={['admin', 'gerente', 'vendedor', 'inventario', 'consulta', 'supervisor']}>
+            <ProtectedRoute rolesPermitidos={['admin', 'gerente', 'vendedor', 'inventario', 'consulta']}>
               <Productos />
             </ProtectedRoute>
           }
@@ -40,7 +41,7 @@ function App() {
         <Route
           path="/clientes"
           element={
-            <ProtectedRoute rolesPermitidos={['admin', 'gerente', 'vendedor', 'consulta', 'supervisor']}>
+            <ProtectedRoute rolesPermitidos={['admin', 'gerente', 'vendedor', 'consulta']}>
               <Clientes />
             </ProtectedRoute>
           }
@@ -49,7 +50,7 @@ function App() {
         <Route
           path="/ventas"
           element={
-            <ProtectedRoute rolesPermitidos={['admin', 'gerente', 'vendedor', 'consulta', 'supervisor']}>
+            <ProtectedRoute rolesPermitidos={['admin', 'gerente', 'vendedor', 'consulta']}>
               <Ventas />
             </ProtectedRoute>
           }
@@ -58,11 +59,22 @@ function App() {
         <Route
           path="/reportes"
           element={
-            <ProtectedRoute rolesPermitidos={['admin', 'gerente', 'consulta', 'supervisor']}>
+            <ProtectedRoute rolesPermitidos={['admin', 'gerente', 'consulta']}>
               <Reportes />
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/procedures"
+          element={
+            <ProtectedRoute rolesPermitidos={['admin', 'gerente', 'inventario', 'consulta']}>
+              <Procedures />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </BrowserRouter>
   );

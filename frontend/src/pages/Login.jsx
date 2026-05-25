@@ -78,10 +78,6 @@ function Login() {
 
         <div className="login-help">
           <p><strong>Admin:</strong> admin / admin123</p>
-          <p><strong>Gerente:</strong> gerente / gerente123</p>
-          <p><strong>Vendedor:</strong> vendedor / vendedor123</p>
-          <p><strong>Inventario:</strong> inventario / inventario123</p>
-          <p><strong>Consulta:</strong> consulta / consulta123</p>
         </div>
       </section>
     </main>
