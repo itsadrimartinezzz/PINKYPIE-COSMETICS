@@ -189,7 +189,38 @@ Estas credenciales están configuradas en `docker-compose.yml` para el contenedo
 
 ---
 
+## Dependencias
+
+**Frontend**
+
+```bash
+cd frontend
+```
+
+```bash
+npm install
+```
+
+```bash
+npm install axios react-router-dom lucide-react
+```
+
+**Backend**
+
+```bash
+cd backend
+```
+
+```bash
+npm install
+```
+
+```bash
+npm install express pg dotenv cors bcryptjs jsonwebtoken sequelize pg-hstore
+```
+
 ## Levantar el proyecto desde cero
+
 
 Desde la raíz del proyecto:
 
