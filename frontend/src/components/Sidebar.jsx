@@ -7,11 +7,21 @@ import {
   BarChart3,
   LogOut
 } from 'lucide-react';
+import api from '../services/api';
 
 function Sidebar() {
   const navigate = useNavigate();
+  const usuarioGuardado = localStorage.getItem('usuario');
+  const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : null;
+  const rol = usuario?.rol;
 
-  const cerrarSesion = () => {
+  const cerrarSesion = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (error) {
+      // Aunque falle el backend, se limpia la sesión local.
+    }
+
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
     navigate('/login');
@@ -21,40 +31,47 @@ function Sidebar() {
     {
       nombre: 'Dashboard',
       ruta: '/dashboard',
-      icono: LayoutDashboard
+      icono: LayoutDashboard,
+      roles: ['admin', 'gerente', 'vendedor', 'inventario', 'consulta', 'supervisor']
     },
     {
       nombre: 'Productos',
       ruta: '/productos',
-      icono: Package
+      icono: Package,
+      roles: ['admin', 'gerente', 'vendedor', 'inventario', 'consulta', 'supervisor']
     },
     {
       nombre: 'Clientes',
       ruta: '/clientes',
-      icono: Users
+      icono: Users,
+      roles: ['admin', 'gerente', 'vendedor', 'consulta', 'supervisor']
     },
     {
       nombre: 'Ventas',
       ruta: '/ventas',
-      icono: ShoppingCart
+      icono: ShoppingCart,
+      roles: ['admin', 'gerente', 'vendedor', 'consulta', 'supervisor']
     },
     {
       nombre: 'Reportes',
       ruta: '/reportes',
-      icono: BarChart3
+      icono: BarChart3,
+      roles: ['admin', 'gerente', 'consulta', 'supervisor']
     }
   ];
+
+  const menuPermitido = menu.filter((item) => item.roles.includes(rol));
 
   return (
     <aside className="sidebar">
       <div>
         <div className="sidebar-brand">
           <h1>PINKYPIE</h1>
-          <p>ADMIN PANEL</p>
+          <p>{rol ? rol.toUpperCase() : 'ADMIN PANEL'}</p>
         </div>
 
         <nav className="sidebar-menu">
-          {menu.map((item) => {
+          {menuPermitido.map((item) => {
             const Icono = item.icono;
 
             return (

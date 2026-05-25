@@ -5,6 +5,9 @@ require('dotenv').config({
   path: path.resolve(__dirname, '../.env')
 });
 
+// Importar Sequelize
+const { sequelize } = require('./models');
+
 const productosRouter = require('./routes/productos');
 const clientesRouter = require('./routes/clientes');
 const ventasRouter = require('./routes/ventas');

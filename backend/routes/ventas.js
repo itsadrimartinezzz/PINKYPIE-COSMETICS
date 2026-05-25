@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-// Funciones del controlador de ventas
 const {
   obtenerVentas,
   obtenerVentaPorId,
@@ -9,10 +8,11 @@ const {
   obtenerEmpleadosActivos
 } = require('../controllers/ventasController');
 
-// Rutas de ventas
-router.get('/', obtenerVentas);
-router.get('/empleados', obtenerEmpleadosActivos);
-router.get('/:id', obtenerVentaPorId);
-router.post('/', crearVenta);
+const { verificarToken, autorizarRoles } = require('../middlewares/authMiddleware');
+
+router.get('/', verificarToken, autorizarRoles('admin', 'gerente', 'vendedor', 'consulta', 'supervisor'), obtenerVentas);
+router.get('/empleados', verificarToken, autorizarRoles('admin', 'gerente', 'vendedor', 'supervisor'), obtenerEmpleadosActivos);
+router.get('/:id', verificarToken, autorizarRoles('admin', 'gerente', 'vendedor', 'consulta', 'supervisor'), obtenerVentaPorId);
+router.post('/', verificarToken, autorizarRoles('admin', 'gerente', 'vendedor'), crearVenta);
 
 module.exports = router;

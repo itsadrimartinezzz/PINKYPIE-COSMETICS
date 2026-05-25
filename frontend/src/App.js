@@ -22,7 +22,7 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute rolesPermitidos={['admin', 'gerente', 'vendedor', 'inventario', 'consulta', 'supervisor']}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -31,7 +31,7 @@ function App() {
         <Route
           path="/productos"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute rolesPermitidos={['admin', 'gerente', 'vendedor', 'inventario', 'consulta', 'supervisor']}>
               <Productos />
             </ProtectedRoute>
           }
@@ -40,7 +40,7 @@ function App() {
         <Route
           path="/clientes"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute rolesPermitidos={['admin', 'gerente', 'vendedor', 'consulta', 'supervisor']}>
               <Clientes />
             </ProtectedRoute>
           }
@@ -49,7 +49,7 @@ function App() {
         <Route
           path="/ventas"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute rolesPermitidos={['admin', 'gerente', 'vendedor', 'consulta', 'supervisor']}>
               <Ventas />
             </ProtectedRoute>
           }
@@ -58,7 +58,7 @@ function App() {
         <Route
           path="/reportes"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute rolesPermitidos={['admin', 'gerente', 'consulta', 'supervisor']}>
               <Reportes />
             </ProtectedRoute>
           }

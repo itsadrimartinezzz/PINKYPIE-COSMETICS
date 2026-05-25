@@ -102,7 +102,8 @@ CREATE TABLE usuario (
     username VARCHAR(60) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     rol VARCHAR(30) NOT NULL DEFAULT 'vendedor'
-        CHECK (rol IN ('admin', 'vendedor', 'supervisor')),
+        CHECK (rol IN ('admin', 'vendedor', 'supervisor', 'gerente', 'inventario', 'consulta')),
+    rol_bd VARCHAR(50),  
     activo BOOLEAN NOT NULL DEFAULT TRUE,
     ultimo_login TIMESTAMPTZ,
 

@@ -1,22 +1,13 @@
-const pool = require('../config/db');
+const { Cliente } = require('../models');
 
-// Obtener todos los clientes
+// MIGRADO A SEQUELIZE
 const obtenerClientes = async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT
-        id_cliente,
-        nombre,
-        apellido,
-        email,
-        telefono,
-        direccion,
-        fecha_registro
-      FROM cliente
-      ORDER BY id_cliente;
-    `);
+    const clientes = await Cliente.findAll({
+      order: [['id_cliente', 'ASC']]
+    });
 
-    res.json(result.rows);
+    res.json(clientes);
   } catch (error) {
     console.error('Error al obtener clientes:', error);
     res.status(500).json({
@@ -25,31 +16,20 @@ const obtenerClientes = async (req, res) => {
   }
 };
 
-// Obtener un cliente por ID
+// MIGRADO A SEQUELIZE
 const obtenerClientePorId = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const result = await pool.query(`
-      SELECT
-        id_cliente,
-        nombre,
-        apellido,
-        email,
-        telefono,
-        direccion,
-        fecha_registro
-      FROM cliente
-      WHERE id_cliente = $1;
-    `, [id]);
+    const cliente = await Cliente.findByPk(id);
 
-    if (result.rows.length === 0) {
+    if (!cliente) {
       return res.status(404).json({
         mensaje: 'Cliente no encontrado'
       });
     }
 
-    res.json(result.rows[0]);
+    res.json(cliente);
   } catch (error) {
     console.error('Error al obtener cliente:', error);
     res.status(500).json({
@@ -58,7 +38,7 @@ const obtenerClientePorId = async (req, res) => {
   }
 };
 
-// Crear un cliente nuevo
+// MIGRADO A SEQUELIZE
 const crearCliente = async (req, res) => {
   try {
     const {
@@ -75,32 +55,22 @@ const crearCliente = async (req, res) => {
       });
     }
 
-    const result = await pool.query(`
-      INSERT INTO cliente (
-        nombre,
-        apellido,
-        email,
-        telefono,
-        direccion
-      )
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING *;
-    `, [
+    const nuevoCliente = await Cliente.create({
       nombre,
       apellido,
       email,
       telefono,
       direccion
-    ]);
+    });
 
     res.status(201).json({
       mensaje: 'Cliente creado correctamente',
-      cliente: result.rows[0]
+      cliente: nuevoCliente
     });
   } catch (error) {
     console.error('Error al crear cliente:', error);
 
-    if (error.code === '23505') {
+    if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(400).json({
         mensaje: 'Ya existe un cliente con ese email'
       });
@@ -112,18 +82,11 @@ const crearCliente = async (req, res) => {
   }
 };
 
-// Actualizar datos del cliente
+// ORM: actualizar cliente
 const actualizarCliente = async (req, res) => {
   try {
     const { id } = req.params;
-
-    const {
-      nombre,
-      apellido,
-      email,
-      telefono,
-      direccion
-    } = req.body;
+    const { nombre, apellido, email, telefono, direccion } = req.body;
 
     if (!nombre || !apellido || !email) {
       return res.status(400).json({
@@ -131,39 +94,30 @@ const actualizarCliente = async (req, res) => {
       });
     }
 
-    const result = await pool.query(`
-      UPDATE cliente
-      SET
-        nombre = $1,
-        apellido = $2,
-        email = $3,
-        telefono = $4,
-        direccion = $5
-      WHERE id_cliente = $6
-      RETURNING *;
-    `, [
-      nombre,
-      apellido,
-      email,
-      telefono,
-      direccion,
-      id
-    ]);
+    const cliente = await Cliente.findByPk(id);
 
-    if (result.rows.length === 0) {
+    if (!cliente) {
       return res.status(404).json({
         mensaje: 'Cliente no encontrado'
       });
     }
 
+    await cliente.update({
+      nombre,
+      apellido,
+      email,
+      telefono,
+      direccion
+    });
+
     res.json({
       mensaje: 'Cliente actualizado correctamente',
-      cliente: result.rows[0]
+      cliente
     });
   } catch (error) {
     console.error('Error al actualizar cliente:', error);
 
-    if (error.code === '23505') {
+    if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(400).json({
         mensaje: 'Ya existe otro cliente con ese email'
       });
@@ -175,22 +129,20 @@ const actualizarCliente = async (req, res) => {
   }
 };
 
-// Eliminar cliente
+// ORM: eliminar cliente
 const eliminarCliente = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const result = await pool.query(`
-      DELETE FROM cliente
-      WHERE id_cliente = $1
-      RETURNING *;
-    `, [id]);
+    const cliente = await Cliente.findByPk(id);
 
-    if (result.rows.length === 0) {
+    if (!cliente) {
       return res.status(404).json({
         mensaje: 'Cliente no encontrado'
       });
     }
+
+    await cliente.destroy();
 
     res.json({
       mensaje: 'Cliente eliminado correctamente'
@@ -198,7 +150,7 @@ const eliminarCliente = async (req, res) => {
   } catch (error) {
     console.error('Error al eliminar cliente:', error);
 
-    if (error.code === '23503') {
+    if (error.name === 'SequelizeForeignKeyConstraintError') {
       return res.status(400).json({
         mensaje: 'No se puede eliminar el cliente porque tiene ventas registradas'
       });

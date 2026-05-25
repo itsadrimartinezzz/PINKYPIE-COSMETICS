@@ -92,6 +92,13 @@ const login = async (req, res) => {
   }
 };
 
+// Cerrar sesión
+const logout = async (req, res) => {
+  return res.json({
+    mensaje: 'Logout exitoso'
+  });
+};
+
 // Obtener perfil del usuario autenticado
 const obtenerPerfil = async (req, res) => {
   try {
@@ -130,5 +137,6 @@ const obtenerPerfil = async (req, res) => {
 
 module.exports = {
   login,
+  logout,
   obtenerPerfil
 };

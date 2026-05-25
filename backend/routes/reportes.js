@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-// Funciones del controlador de reportes
 const {
   obtenerProductosInventario,
   obtenerVentasGenerales,
@@ -13,14 +12,17 @@ const {
   obtenerDashboard
 } = require('../controllers/reportesController');
 
-// Rutas de reportes
-router.get('/productos-inventario', obtenerProductosInventario);
-router.get('/ventas-generales', obtenerVentasGenerales);
-router.get('/detalle-ventas', obtenerDetalleVentas);
-router.get('/ventas-categoria', obtenerVentasPorCategoria);
-router.get('/productos-mas-vendidos', obtenerProductosMasVendidos);
-router.get('/stock-bajo', obtenerStockBajo);
-router.get('/ventas-diarias', obtenerVentasDiarias);
-router.get('/dashboard', obtenerDashboard);
+const { verificarToken, autorizarRoles } = require('../middlewares/authMiddleware');
+
+const puedeVerReportes = autorizarRoles('admin', 'gerente', 'consulta', 'supervisor');
+
+router.get('/productos-inventario', verificarToken, puedeVerReportes, obtenerProductosInventario);
+router.get('/ventas-generales', verificarToken, puedeVerReportes, obtenerVentasGenerales);
+router.get('/detalle-ventas', verificarToken, puedeVerReportes, obtenerDetalleVentas);
+router.get('/ventas-categoria', verificarToken, puedeVerReportes, obtenerVentasPorCategoria);
+router.get('/productos-mas-vendidos', verificarToken, puedeVerReportes, obtenerProductosMasVendidos);
+router.get('/stock-bajo', verificarToken, puedeVerReportes, obtenerStockBajo);
+router.get('/ventas-diarias', verificarToken, puedeVerReportes, obtenerVentasDiarias);
+router.get('/dashboard', verificarToken, autorizarRoles('admin', 'gerente', 'vendedor', 'inventario', 'consulta', 'supervisor'), obtenerDashboard);
 
 module.exports = router;

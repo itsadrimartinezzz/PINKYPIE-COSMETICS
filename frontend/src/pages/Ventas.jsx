@@ -8,6 +8,7 @@ import AlertMessage from '../components/AlertMessage';
 import api from '../services/api';
 
 function Ventas() {
+  // ✅ CORREGIDO: Inicializar como arrays vacíos
   const [ventas, setVentas] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [empleados, setEmpleados] = useState([]);
@@ -42,13 +43,19 @@ function Ventas() {
         api.get('/productos')
       ]);
 
-      setVentas(ventasResponse.data);
-      setClientes(clientesResponse.data);
-      setEmpleados(empleadosResponse.data);
-      setProductos(productosResponse.data.filter((p) => p.activo));
+      // ✅ CORREGIDO: Validar que sean arrays antes de setear
+      setVentas(Array.isArray(ventasResponse.data) ? ventasResponse.data : []);
+      setClientes(Array.isArray(clientesResponse.data) ? clientesResponse.data : []);
+      setEmpleados(Array.isArray(empleadosResponse.data) ? empleadosResponse.data : []);
+      setProductos(Array.isArray(productosResponse.data) ? productosResponse.data.filter((p) => p.activo) : []);
     } catch (error) {
       setTipoMensaje('error');
       setMensaje('No se pudieron cargar los datos de ventas');
+      // ✅ CORREGIDO: En caso de error, asegurar que sean arrays
+      setVentas([]);
+      setClientes([]);
+      setEmpleados([]);
+      setProductos([]);
     } finally {
       setCargando(false);
     }
@@ -70,10 +77,11 @@ function Ventas() {
     });
   };
 
-  const ventasFiltradas = ventas.filter((venta) => {
+  // ✅ CORREGIDO: Validar que ventas sea array antes de filtrar
+  const ventasFiltradas = Array.isArray(ventas) ? ventas.filter((venta) => {
     const texto = `${venta.id_venta} ${venta.cliente} ${venta.empleado} ${venta.estado}`.toLowerCase();
     return texto.includes(busqueda.toLowerCase());
-  });
+  }) : [];
 
   const manejarCambio = (e) => {
     const { name, value } = e.target;

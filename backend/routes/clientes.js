@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-// Importar funciones del controlador
 const {
   obtenerClientes,
   obtenerClientePorId,
@@ -10,11 +9,12 @@ const {
   eliminarCliente
 } = require('../controllers/clientesController');
 
-// Rutas CRUD de clientes
-router.get('/', obtenerClientes);
-router.get('/:id', obtenerClientePorId);
-router.post('/', crearCliente);
-router.put('/:id', actualizarCliente);
-router.delete('/:id', eliminarCliente);
+const { verificarToken, autorizarRoles } = require('../middlewares/authMiddleware');
+
+router.get('/', verificarToken, autorizarRoles('admin', 'gerente', 'vendedor', 'consulta', 'supervisor'), obtenerClientes);
+router.get('/:id', verificarToken, autorizarRoles('admin', 'gerente', 'vendedor', 'consulta', 'supervisor'), obtenerClientePorId);
+router.post('/', verificarToken, autorizarRoles('admin', 'gerente', 'vendedor'), crearCliente);
+router.put('/:id', verificarToken, autorizarRoles('admin', 'gerente'), actualizarCliente);
+router.delete('/:id', verificarToken, autorizarRoles('admin'), eliminarCliente);
 
 module.exports = router;
